@@ -22,7 +22,7 @@ export async function GET() {
     if (!userSettings) {
       await prisma.userSettings.create({
         data: {
-          userId: existingUser.id,
+          id: existingUser.id,
           currency: "USD",
           clerkId: existingUser.clerkId,
         },

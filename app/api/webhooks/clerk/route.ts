@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import {
   createUser,
   deleteUser,
