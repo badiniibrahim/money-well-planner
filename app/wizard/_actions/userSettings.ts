@@ -1,4 +1,4 @@
-"user server";
+"use server";
 
 import { DEFAULT_BUDGET_RULES } from "@/constants";
 import prisma from "@/prisma/prisma";
