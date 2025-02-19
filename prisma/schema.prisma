@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int      @id @default(autoincrement())
+  clerkId          String   @unique
+  email            String   @unique
+  name             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  stripeCustomerId String?
+
+  // Relations
+  budgets      Budget[]
+  userSettings UserSettings[]
+  budgetRule   BudgetRule[]
+
+  @@map("user")
+}
+
+model UserSettings {
+  id        Int      @id @default(autoincrement())
+  currency  String
+  clerkId   String   @unique
+  user      User     @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+model Budget {
+  id        Int      @id @default(autoincrement())
+  name      String
+  date      DateTime @default(now())
+  amount    Decimal
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  clerkId   String
+  user      User     @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+
+  @@map("budget")
+}
+
+model BudgetRule {
+  id                      Int    @id @default(autoincrement())
+  needsPercentage         Float  @default(50)
+  savingsPercentage       Float  @default(30)
+  wantsPercentage         Float  @default(20)
+  actualNeedsPercentage   Float  @default(0)
+  actualSavingsPercentage Float  @default(0)
+  actualWantsPercentage   Float  @default(0)
+  clerkId                 String
+  user                    User   @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+
+  @@unique([clerkId])
+  @@map("budget_rule")
+}
