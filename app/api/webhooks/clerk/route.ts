@@ -19,7 +19,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Get the headers
   const headerPayload = headers();
   const svix_id = (await headerPayload).get("svix-id");
   const svix_timestamp = (await headerPayload).get("svix-timestamp");
