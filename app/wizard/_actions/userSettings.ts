@@ -2,6 +2,7 @@
 
 import { DEFAULT_BUDGET_RULES } from "@/constants";
 import prisma from "@/prisma/prisma";
+import { UserData } from "@/schema/user";
 import { UpdateUserCurrencySchema } from "@/schema/userSettings";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -30,42 +31,36 @@ export async function updateUserCurrency(currency: string) {
   return userSettings;
 }
 
-export async function createUser(user: any) {
+export async function createUser(user: UserData) {
   try {
-    const email = user.primaryEmailAddress?.emailAddress ?? "";
-    const fullName = user.fullName ?? "";
-
-    if (!email || !fullName) {
-      throw new Error("User email or full name is missing.");
+    if (!user) {
+      throw new Error("User not found or not authenticated.");
     }
 
-    await prisma.$transaction(async (prisma) => {
-      const newUser = await createOrUpdateUser(user.id, email, fullName);
-      await createOrUpdateBudgetRule(newUser.id, user.id);
-    });
+    const newUser = await createOrUpdateUser(user);
+    await createOrUpdateBudgetRule(user.clerkId);
+    return newUser;
   } catch (error) {
     console.error("Failed to create user:", error);
     throw error;
   }
 }
 
-async function createOrUpdateUser(
-  clerkId: string,
-  email: string,
-  fullName: string
-) {
+async function createOrUpdateUser(user: UserData) {
   return await prisma.user.upsert({
-    where: { clerkId },
+    where: { clerkId: user.clerkId },
     update: {},
     create: {
-      clerkId,
-      email,
-      name: fullName,
+      clerkId: user.clerkId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      photo: user.photo,
     },
   });
 }
 
-async function createOrUpdateBudgetRule(userId: number, clerkId: string) {
+async function createOrUpdateBudgetRule(clerkId: string) {
   return await prisma.budgetRule.upsert({
     where: { clerkId },
     update: {},
@@ -76,13 +71,13 @@ async function createOrUpdateBudgetRule(userId: number, clerkId: string) {
   });
 }
 
-export async function deleteUser(id: string) {
+export async function deleteUser(clerkId: string) {
   try {
     await prisma.$transaction(async (prisma) => {
-      await prisma.budget.deleteMany({ where: { clerkId: id } });
-      await prisma.budgetRule.deleteMany({ where: { clerkId: id } });
-      await prisma.userSettings.deleteMany({ where: { clerkId: id } });
-      await prisma.user.delete({ where: { clerkId: id } });
+      // await prisma.budget.deleteMany({ where: { clerkId} });
+      await prisma.budgetRule.deleteMany({ where: { clerkId } });
+      //await prisma.userSettings.deleteMany({ where: { clerkId } });
+      await prisma.user.delete({ where: { clerkId } });
     });
 
     console.log("User and associated data deleted successfully.");
@@ -92,18 +87,18 @@ export async function deleteUser(id: string) {
   }
 }
 
-export async function updateUser(id: string, user: any) {
+export async function updateUser(user: UserData) {
   try {
-    const user = await currentUser();
-    if (!user?.id) {
+    if (!user && user) {
       throw new Error("User not found or not authenticated.");
     }
-
     const updatedUser = await prisma.user.update({
-      where: { clerkId: user.id },
+      where: { clerkId: user.clerkId },
       data: {
-        email: "",
-        name: "",
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        photo: user.photo,
       },
     });
 

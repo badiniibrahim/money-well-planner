@@ -21,6 +21,7 @@ import { Currencies, Currency } from "@/constants";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import SkeletonWrapper from "@/components/shared/SkeletonWrapper";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 // Main Component
 export function CurrencyComBox() {
@@ -93,21 +94,26 @@ export function CurrencyComBox() {
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full justify-between items-center bg-white border-gray-300 text-gray-800"
+              className="w-full justify-between items-center bg-white border-gray-200 hover:bg-gray-50 text-gray-800 shadow-sm"
               disabled={mutation.isPending}
               aria-label="Select currency"
             >
               {selectedOption ? (
                 <>
-                  <span>{selectedOption.label}</span>
-                  <span className="text-gray-500">{selectedOption.value}</span>
+                  <span className="font-medium">{selectedOption.label}</span>
+                  <span className="text-gray-500 ml-2">
+                    {selectedOption.value}
+                  </span>
                 </>
               ) : (
                 <>Set currency</>
               )}
+              {mutation.isPending && (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0" align="start">
+          <PopoverContent className="w-[220px] p-0 shadow-lg" align="start">
             <OptionList
               setOpen={setOpen}
               setSelectedOption={handleSelectionOption}
@@ -125,21 +131,26 @@ export function CurrencyComBox() {
         <DrawerTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between items-center bg-white border-gray-300 text-gray-800"
+            className="w-full justify-between items-center bg-white border-gray-200 hover:bg-gray-50 text-gray-800 shadow-sm"
             disabled={mutation.isPending}
             aria-label="Select currency"
           >
             {selectedOption ? (
               <>
                 <span className="font-medium">{selectedOption.label}</span>
-                <span className="text-gray-500">{selectedOption.value}</span>
+                <span className="text-gray-500 ml-2">
+                  {selectedOption.value}
+                </span>
               </>
             ) : (
               <>Set currency</>
             )}
+            {mutation.isPending && (
+              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+            )}
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="bg-gray-50 border-t rounded-t-xl shadow-lg">
+        <DrawerContent className="border-t rounded-t-xl shadow-lg">
           <div className="mt-4 p-4 space-y-4">
             <h2 className="text-lg font-semibold text-gray-800">
               Select Currency
@@ -167,8 +178,11 @@ function OptionList({
   options: Currency[];
 }) {
   return (
-    <Command className="bg-white">
-      <CommandInput placeholder="Filter currency..." />
+    <Command className="rounded-lg">
+      <CommandInput
+        placeholder="Filter currency..."
+        className="focus:ring-0 focus:border-gray-300"
+      />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
@@ -182,9 +196,11 @@ function OptionList({
                 );
                 setOpen(false);
               }}
+              className="cursor-pointer hover:bg-gray-50"
               aria-label={`Select ${currency.label}`}
             >
-              {currency.label}
+              <span className="font-medium">{currency.label}</span>
+              <span className="text-gray-500 ml-2">{currency.value}</span>
             </CommandItem>
           ))}
         </CommandGroup>

@@ -13,17 +13,17 @@ import React from "react";
 import { CurrencyComBox } from "./_components/CurrencyComBox";
 
 async function WizardPage() {
-  const user = await currentUser();
+  /*const user = await currentUser();
   if (!user) {
     return redirect("/sign-in");
-  }
+  }*/
 
   return (
     <div className="container max-w-2xl mx-auto p-6 flex flex-col items-center space-y-6">
       {/* Header Section */}
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-extrabold text-gradient from-purple-500 to-indigo-500">
-          Welcome, <span className="font-bold">{user.firstName}!</span>
+          Welcome, <span className="font-bold">{"user.firstName"}!</span>
         </h1>
         <p className="text-lg text-gray-500">
           Let’s get started by setting up your currency.

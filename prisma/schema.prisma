@@ -11,7 +11,10 @@ model User {
   id               Int      @id @default(autoincrement())
   clerkId          String   @unique
   email            String   @unique
-  name             String
+  lastName         String
+  firstName        String
+  username         String?
+  photo            String
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   stripeCustomerId String?
