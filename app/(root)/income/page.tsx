@@ -8,7 +8,6 @@ import { getAllIncome } from "./_actions/actions";
 import AlertComponent from "@/components/shared/AlertComponent";
 import UserIncome from "./_components/UserIncome";
 import { PlusCircle, Loader2 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 function Page() {
   const {
