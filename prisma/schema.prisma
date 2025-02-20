@@ -42,7 +42,7 @@ model Budget {
   id        Int      @id @default(autoincrement())
   name      String
   date      DateTime @default(now())
-  amount    Decimal
+  amount    Float
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
   clerkId   String
