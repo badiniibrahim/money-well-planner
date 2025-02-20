@@ -38,7 +38,6 @@ function UserIncome({ incomes, currency }: Props) {
       </div>
     );
   }
-
   return (
     <div className="grid grid-cols-1 gap-6 mt-6">
       <IncomeTable budgets={incomes} currency={currency} />
