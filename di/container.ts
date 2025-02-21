@@ -2,6 +2,7 @@ import { Container } from "inversify";
 import { DI_SYMBOLS } from "./types";
 import { IncomeModule } from "./modules/income.module";
 import { DashboardModule } from "./modules/dashboard.module";
+import { ChargeModule } from "./modules/charge.module";
 
 const ApplicationContainer = new Container({
   defaultScope: "Singleton",
@@ -14,6 +15,10 @@ export const initializeContainer = () => {
     }
     if (!ApplicationContainer.isBound(DI_SYMBOLS.IDashboardRepository)) {
       ApplicationContainer.load(DashboardModule);
+    }
+
+    if (!ApplicationContainer.isBound(DI_SYMBOLS.IChargeRepository)) {
+      ApplicationContainer.load(ChargeModule);
     }
   } catch (error) {
     console.error("InversifyJS Container Error:", error);

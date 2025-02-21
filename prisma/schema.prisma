@@ -23,6 +23,7 @@ model User {
   budgets      Budget[]
   userSettings UserSettings[]
   budgetRule   BudgetRule[]
+  expense      Expense[]
 
   @@map("user")
 }
@@ -49,6 +50,21 @@ model Budget {
   user      User     @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
 
   @@map("budget")
+}
+
+model Expense {
+  id           Int       @id @default(autoincrement())
+  name         String
+  dueDate      DateTime?
+  budgetAmount Float
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  clerkId      String
+  type         String    @default("fixed")
+
+  user User @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+
+  @@map("expense")
 }
 
 model BudgetRule {
