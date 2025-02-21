@@ -4,12 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { getState } from "./_actions/actions";
 import { GetFormatterForCurrency } from "@/lib/helpers";
-import TotalIncome from "./_components/TotalIncome";
 import AlertComponent from "@/components/shared/AlertComponent";
-import { CreditCard, BarChart, Loader2 } from "lucide-react";
+import { CreditCard, BarChart, Loader2, DollarSign } from "lucide-react";
 import ExpenseCard from "./_components/ExpenseCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FaGlassCheers, FaPiggyBank, FaRegCreditCard } from "react-icons/fa";
+import PieBalanceChart from "./_components/PieStateChart";
+import StateChart from "./_components/StateChart";
+import BudgetRuleTable from "./_components/BudgetRuleTable";
 
 function DashboardPage() {
   const {
@@ -21,7 +22,6 @@ function DashboardPage() {
     queryKey: ["state"],
     queryFn: () => getState(),
   });
-
   const formatter = GetFormatterForCurrency(state?.currency ?? "USD");
 
   if (isError && error instanceof Error) {
@@ -30,9 +30,15 @@ function DashboardPage() {
 
   const cardsConfig = [
     {
+      title: "Total Budget",
+      value: state?.totalBudget,
+      color: "bg-indigo-600",
+      icon: DollarSign,
+    },
+    {
       title: "Remains to Budget",
       value: state?.remainsBudget,
-      color: "bg-[#1a202c]",
+      color: "bg-green-600",
       icon: BarChart,
     },
     {
@@ -50,58 +56,63 @@ function DashboardPage() {
     {
       title: "Debts",
       value: state?.totalDebt,
-      color: "bg-[hsl(var(--chart-5))]",
+      color: "bg-red-500",
       icon: FaRegCreditCard,
     },
-
     {
       title: "Savings and Investments",
       value: state?.savings,
-      color: "bg-[hsl(var(--chart-4))]",
+      color: "bg-yellow-500",
       icon: FaPiggyBank,
     },
     {
       title: "Pleasure",
       value: state?.totalPleasure,
-      color: "bg-[hsl(var(--chart-6))]",
+      color: "bg-pink-500",
       icon: FaGlassCheers,
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-900">
+        <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
   return (
-    <Card className="bg-slate-900 border-slate-800 shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-white">
-          Dashboard
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <TotalIncome
-              currency={state?.currency ?? "USD"}
-              totalBudget={state?.totalBudget ?? 0}
+    <div className="bg-slate-900 min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <h1 className="text-2xl font-bold text-white mb-6">
+          Financial Dashboard
+        </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {cardsConfig.map((card, index) => (
+            <ExpenseCard
+              key={index}
+              title={card.title}
+              value={card.value ?? 0}
+              color={card.color}
+              icon={card.icon}
+              currencyFormatter={formatter.format}
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cardsConfig.map((card, index) => (
-                <ExpenseCard
-                  key={index}
-                  title={card.title}
-                  value={card.value ?? 0}
-                  color={card.color}
-                  icon={card.icon}
-                  currencyFormatter={formatter.format}
-                />
-              ))}
+          ))}
+        </div>
+
+        {state && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <StateChart state={state} />
+            </div>
+            <div className="space-y-6">
+              <BudgetRuleTable budgetRules={state.budgetRules} />
+              <PieBalanceChart state={state} />
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

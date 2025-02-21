@@ -60,7 +60,7 @@ function CreatePleasuresDialog({ trigger }: Props) {
 
   const onSubmit = useCallback(
     (values: PleasuresType) => {
-      toast.loading("Creating pleasure...", { id: "create-pleasure" });
+      //toast.loading("Creating pleasure...", { id: "create-pleasure" });
       mutate(values);
     },
     [mutate]
