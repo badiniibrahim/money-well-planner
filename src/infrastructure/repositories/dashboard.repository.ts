@@ -20,6 +20,7 @@ export class DashboardRepository implements IDashboardRepository {
         budgetRules,
         debtsAggregate,
         savingsData,
+        pleasureData,
       ] = await prisma.$transaction(async (prisma) => {
         return Promise.all([
           this.getUserSettings(userId),
@@ -28,6 +29,7 @@ export class DashboardRepository implements IDashboardRepository {
           this.getBudgetRules(userId),
           this.getDebtsData(userId),
           this.getSavingsData(userId),
+          this.getPleasureData(userId),
         ]);
       });
 
@@ -42,8 +44,15 @@ export class DashboardRepository implements IDashboardRepository {
 
       const totalDebt = debtsAggregate?._sum?.budgetAmount ?? 0;
 
+      const totalPleasure = pleasureData._sum.budgetAmount || 0;
+
       const totalExpenses =
-        totalFixed + totalVariable + totalDebt + totalSaving + totalInvest;
+        totalFixed +
+        totalVariable +
+        totalDebt +
+        totalSaving +
+        totalInvest +
+        totalPleasure;
       const remainsBudget = Math.max(totalBudget - totalExpenses, 0); // Évite d'avoir un budget négatif
 
       if (!budgetRules) {
@@ -59,6 +68,7 @@ export class DashboardRepository implements IDashboardRepository {
         remainsBudget,
         totalDebt,
         savings: totalSaving + totalInvest,
+        totalPleasure,
       };
     } catch (error) {
       console.error(`❌ Error in getState (userId: ${userId}):`, error);
@@ -97,6 +107,13 @@ export class DashboardRepository implements IDashboardRepository {
   private async getSavingsData(userId: string) {
     return prisma.savings.groupBy({
       by: ["type"],
+      where: { clerkId: userId },
+      _sum: { budgetAmount: true },
+    });
+  }
+
+  private async getPleasureData(userId: string) {
+    return prisma.pleasure.aggregate({
       where: { clerkId: userId },
       _sum: { budgetAmount: true },
     });

@@ -9,7 +9,7 @@ import AlertComponent from "@/components/shared/AlertComponent";
 import { CreditCard, BarChart, Loader2 } from "lucide-react";
 import ExpenseCard from "./_components/ExpenseCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaPiggyBank, FaRegCreditCard } from "react-icons/fa";
+import { FaGlassCheers, FaPiggyBank, FaRegCreditCard } from "react-icons/fa";
 
 function DashboardPage() {
   const {
@@ -59,6 +59,12 @@ function DashboardPage() {
       value: state?.savings,
       color: "bg-[hsl(var(--chart-4))]",
       icon: FaPiggyBank,
+    },
+    {
+      title: "Pleasure",
+      value: state?.totalPleasure,
+      color: "bg-[hsl(var(--chart-6))]",
+      icon: FaGlassCheers,
     },
   ];
 

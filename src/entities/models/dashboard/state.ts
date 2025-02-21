@@ -9,4 +9,5 @@ export interface State {
   remainsBudget: number;
   totalDebt: number;
   savings: number;
+  totalPleasure: number;
 }
