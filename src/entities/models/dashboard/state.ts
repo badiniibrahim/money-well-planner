@@ -7,5 +7,6 @@ export interface State {
   totalVariable: number;
   budgetRules: BudgetRule;
   remainsBudget: number;
-  totalDebt:number
+  totalDebt: number;
+  savings: number;
 }
