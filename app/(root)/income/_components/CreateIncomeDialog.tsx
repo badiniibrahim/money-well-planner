@@ -72,16 +72,19 @@ function CreateIncomeDialog({ trigger }: Props) {
       <DialogTrigger asChild onClick={() => setDialogOpen(true)}>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 border-slate-700/50 text-white">
+      <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold text-white">
             Add New Income
           </DialogTitle>
         </DialogHeader>
 
-        <Card className="bg-slate-800/50 p-5 border-slate-700/50 backdrop-blur-xl mt-6">
+        <Card className="bg-slate-800 border-slate-700 mt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 p-6"
+            >
               <FormField
                 control={form.control}
                 name="name"
@@ -94,7 +97,7 @@ function CreateIncomeDialog({ trigger }: Props) {
                       <Input
                         placeholder="e.g. Salary, Freelance"
                         {...field}
-                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
+                        className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </FormControl>
                     <FormMessage className="text-red-400 text-xs mt-1" />
@@ -110,12 +113,15 @@ function CreateIncomeDialog({ trigger }: Props) {
                       Amount
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="0.00"
-                        {...field}
-                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
-                      />
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          {...field}
+                          className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage className="text-red-400 text-xs mt-1" />
                   </FormItem>
@@ -123,7 +129,7 @@ function CreateIncomeDialog({ trigger }: Props) {
               />
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
                 disabled={isPending}
               >
                 {!isPending && (
