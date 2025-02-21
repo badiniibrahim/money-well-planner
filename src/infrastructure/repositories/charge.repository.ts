@@ -31,7 +31,7 @@ export class CreateChargeRepository implements IChargeRepository {
 
     try {
       return await prisma.$transaction(async (tx) => {
-        const result = await tx.expense.create({
+        const expense = await tx.expense.create({
           data: {
             ...data,
             dueDate: data.dueDate ? new Date(data.dueDate) : new Date(),
@@ -39,12 +39,13 @@ export class CreateChargeRepository implements IChargeRepository {
           },
         });
 
-        if (!result) {
+        if (!expense) {
           throw new NotFoundError("Failed to create expense.");
         }
 
         await this.updateBudgetRules(tx, userId);
-        return result;
+
+        return expense;
       });
     } catch (error) {
       console.error(
@@ -66,14 +67,17 @@ export class CreateChargeRepository implements IChargeRepository {
 
     try {
       const [userSettings, expenses] = await Promise.all([
-        prisma.userSettings.findUnique({ where: { clerkId: userId } }),
+        this.getUserSettings(userId),
         prisma.expense.findMany({
           where: { clerkId: userId },
           orderBy: { createdAt: "asc" },
         }),
       ]);
 
-      return { currency: userSettings?.currency || "USD", expense: expenses };
+      return {
+        currency: userSettings?.currency || "USD",
+        expense: expenses,
+      };
     } catch (error) {
       console.error(
         `❌ Database Error in getAllExpense (userId: ${userId}):`,
@@ -92,13 +96,15 @@ export class CreateChargeRepository implements IChargeRepository {
 
     try {
       await prisma.$transaction(async (tx) => {
-        const deletedExpense = await tx.expense.deleteMany({
+        const chargeExists = await tx.expense.findFirst({
           where: { id: chargeId, clerkId: userId },
         });
 
-        if (deletedExpense.count === 0) {
+        if (!chargeExists) {
           throw new NotFoundError("Expense not found or already deleted.");
         }
+
+        await tx.expense.delete({ where: { id: chargeId } });
 
         await this.updateBudgetRules(tx, userId);
       });
@@ -113,48 +119,75 @@ export class CreateChargeRepository implements IChargeRepository {
     }
   }
 
+  private async getUserSettings(userId: string) {
+    return prisma.userSettings.findUnique({ where: { clerkId: userId } });
+  }
+
   private async updateBudgetRules(tx: any, userId: string): Promise<void> {
-    const [budget, budgetRules, totalExpenses] = await Promise.all([
-      tx.budget.aggregate({
-        where: { clerkId: userId },
-        _sum: { amount: true },
-      }),
-      tx.budgetRule.findFirst({ where: { clerkId: userId } }),
-      tx.expense.groupBy({
-        by: ["type"],
-        where: { clerkId: userId },
-        _sum: { budgetAmount: true },
-        orderBy: { type: "asc" },
-      }),
-    ]);
+    try {
+      const [budget, budgetRules, totalExpenses, totalSavings] =
+        await Promise.all([
+          tx.budget.aggregate({
+            where: { clerkId: userId },
+            _sum: { amount: true },
+          }),
+          tx.budgetRule.findFirst({ where: { clerkId: userId } }),
+          tx.expense.groupBy({
+            by: ["type"],
+            where: { clerkId: userId },
+            _sum: { budgetAmount: true },
+          }),
+          tx.savings.groupBy({
+            by: ["type"],
+            where: { clerkId: userId },
+            _sum: { budgetAmount: true },
+          }),
+        ]);
 
-    if (!budget || !budgetRules) {
-      throw new NotFoundError("Budget or budget rules not found.");
+      if (!budget || !budgetRules) {
+        throw new NotFoundError("Budget or budget rules not found.");
+      }
+
+      const totalBudget = budget._sum.amount ?? 0;
+      const totalFixed = this.getSumByType(totalExpenses, "fixed");
+      const totalVariable = this.getSumByType(totalExpenses, "variable");
+      const totalSaving = this.getSumByType(totalSavings, "saving");
+      const totalInvest = this.getSumByType(totalSavings, "invest");
+
+      const totalExpensesAmount = totalFixed + totalVariable;
+      const needsPercentage =
+        totalBudget > 0 ? (totalExpensesAmount / totalBudget) * 100 : 0;
+      const savingsPercentage =
+        totalBudget > 0 ? ((totalSaving + totalInvest) / totalBudget) * 100 : 0;
+
+      await tx.budgetRule.upsert({
+        where: { id: budgetRules.id },
+        update: {
+          actualNeedsPercentage: needsPercentage,
+          // actualSavingsPercentage: savingsPercentage,
+        },
+        create: {
+          needsPercentage: 50,
+          savingsPercentage: 30,
+          wantsPercentage: 20,
+          actualNeedsPercentage: 0,
+          actualSavingsPercentage: 0,
+          actualWantsPercentage: 0,
+          clerkId: userId,
+        },
+      });
+    } catch (error) {
+      console.error(
+        `❌ Database Error in updateBudgetRules (userId: ${userId}):`,
+        error
+      );
+      throw new DatabaseOperationError(
+        `Failed to update budget rules: ${(error as Error).message}`
+      );
     }
+  }
 
-    const totalBudget = budget._sum.amount ?? 0;
-    const totalFixed =
-      totalExpenses.find((t: { type: string }) => t.type === "fixed")?._sum
-        ?.budgetAmount ?? 0;
-    const totalVariable =
-      totalExpenses.find((t: { type: string }) => t.type === "variable")?._sum
-        ?.budgetAmount ?? 0;
-    const totalExpense = totalFixed + totalVariable;
-    const needsPercentage =
-      totalBudget > 0 ? (totalExpense / totalBudget) * 100 : 0;
-
-    await tx.budgetRule.upsert({
-      where: { id: budgetRules.id },
-      update: { actualNeedsPercentage: needsPercentage },
-      create: {
-        needsPercentage: 50,
-        savingsPercentage: 30,
-        wantsPercentage: 20,
-        actualNeedsPercentage: 0,
-        actualSavingsPercentage: 0,
-        actualWantsPercentage: 0,
-        clerkId: userId,
-      },
-    });
+  private getSumByType(data: any[], type: string): number {
+    return data?.find((item) => item.type === type)?._sum?.budgetAmount ?? 0;
   }
 }

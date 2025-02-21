@@ -18,27 +18,38 @@ export class DashboardRepository implements IDashboardRepository {
         budgetAggregate,
         expenseData,
         budgetRules,
-        debtsData,
-      ] = await Promise.all([
-        this.getUserSettings(userId),
-        this.getTotalBudget(userId),
-        this.getExpenseData(userId),
-        this.getBudgetRules(userId),
-        this.getDebtsData(userId),
-      ]);
+        debtsAggregate,
+        savingsData,
+      ] = await prisma.$transaction(async (prisma) => {
+        return Promise.all([
+          this.getUserSettings(userId),
+          this.getTotalBudget(userId),
+          this.getExpenseData(userId),
+          this.getBudgetRules(userId),
+          this.getDebtsData(userId),
+          this.getSavingsData(userId),
+        ]);
+      });
 
       const currency = userSettings?.currency || "USD";
-      const totalBudget = budgetAggregate._sum.amount ?? 0;
+      const totalBudget = budgetAggregate?._sum?.amount ?? 0;
+
       const totalFixed = this.getSumByType(expenseData, "fixed");
       const totalVariable = this.getSumByType(expenseData, "variable");
-      const totalDebt = debtsData._sum.budgetAmount || 0;
 
-      const remainsBudget =
-        totalBudget - totalFixed - totalVariable - totalDebt;
+      const totalSaving = this.getSumByType(savingsData, "saving");
+      const totalInvest = this.getSumByType(savingsData, "invest");
+
+      const totalDebt = debtsAggregate?._sum?.budgetAmount ?? 0;
+
+      const totalExpenses =
+        totalFixed + totalVariable + totalDebt + totalSaving + totalInvest;
+      const remainsBudget = Math.max(totalBudget - totalExpenses, 0); // Évite d'avoir un budget négatif
 
       if (!budgetRules) {
         throw new DatabaseOperationError("Budget rules not found");
       }
+
       return {
         totalBudget,
         currency,
@@ -47,6 +58,7 @@ export class DashboardRepository implements IDashboardRepository {
         budgetRules,
         remainsBudget,
         totalDebt,
+        savings: totalSaving + totalInvest,
       };
     } catch (error) {
       console.error(`❌ Error in getState (userId: ${userId}):`, error);
@@ -72,7 +84,6 @@ export class DashboardRepository implements IDashboardRepository {
       by: ["type"],
       where: { clerkId: userId },
       _sum: { budgetAmount: true },
-      orderBy: { type: "asc" },
     });
   }
 
@@ -83,11 +94,19 @@ export class DashboardRepository implements IDashboardRepository {
     });
   }
 
+  private async getSavingsData(userId: string) {
+    return prisma.savings.groupBy({
+      by: ["type"],
+      where: { clerkId: userId },
+      _sum: { budgetAmount: true },
+    });
+  }
+
   private async getBudgetRules(userId: string) {
     return prisma.budgetRule.findFirst({ where: { clerkId: userId } });
   }
 
   private getSumByType(data: any[], type: string): number {
-    return data.find((item) => item.type === type)?._sum?.budgetAmount ?? 0;
+    return data?.find((item) => item.type === type)?._sum?.budgetAmount ?? 0;
   }
 }

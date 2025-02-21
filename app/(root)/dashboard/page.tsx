@@ -9,7 +9,7 @@ import AlertComponent from "@/components/shared/AlertComponent";
 import { CreditCard, BarChart, Loader2 } from "lucide-react";
 import ExpenseCard from "./_components/ExpenseCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaRegCreditCard } from "react-icons/fa";
+import { FaPiggyBank, FaRegCreditCard } from "react-icons/fa";
 
 function DashboardPage() {
   const {
@@ -52,6 +52,13 @@ function DashboardPage() {
       value: state?.totalDebt,
       color: "bg-[hsl(var(--chart-5))]",
       icon: FaRegCreditCard,
+    },
+
+    {
+      title: "Savings and Investments",
+      value: state?.savings,
+      color: "bg-[hsl(var(--chart-4))]",
+      icon: FaPiggyBank,
     },
   ];
 

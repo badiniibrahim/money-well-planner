@@ -11,6 +11,9 @@ import { GetAllIDebtsUseCase } from "@/src/application/use-cases/debts/get-all-d
 import { CreateIncomeUseCase } from "@/src/application/use-cases/income/create-income.use-case";
 import { DeleteIncomeUseCase } from "@/src/application/use-cases/income/delete-income.use-case";
 import { GetAllIncomeUseCase } from "@/src/application/use-cases/income/get-all-income.use-case";
+import { CreateSavingsCase } from "@/src/application/use-cases/savings/create-savings.use-case";
+import { DeleteSavingsUseCase } from "@/src/application/use-cases/savings/delete-savings.use-case";
+import { GetAllSavingsUseCase } from "@/src/application/use-cases/savings/get-all-savings.use-case";
 
 export const DI_SYMBOLS = {
   // Repositories
@@ -18,6 +21,7 @@ export const DI_SYMBOLS = {
   IDashboardRepository: Symbol.for("IDashboardRepository"),
   IChargeRepository: Symbol.for("IChargeRepository"),
   IDebtsRepository: Symbol.for("IDebtsRepository"),
+  ISavingsRepository: Symbol.for("ISavingsRepository"),
 
   // Use Cases
   CreateIncomeUseCase: Symbol.for("CreateIncomeUseCase"),
@@ -33,6 +37,10 @@ export const DI_SYMBOLS = {
   GetAllIDebtsUseCase: Symbol.for("GetAllIDebtsUseCase"),
   CreateDebtsCase: Symbol.for("CreateDebtsCase"),
   DeleteDebtsUseCase: Symbol.for("DeleteDebtsUseCase"),
+
+  GetAllSavingsUseCase: Symbol.for("GetAllSavingsUseCase"),
+  DeleteSavingsUseCase: Symbol.for("DeleteSavingsUseCase"),
+  CreateSavingsCase: Symbol.for("CreateSavingsCase"),
 };
 
 export interface DI_RETURN_TYPES {
@@ -53,4 +61,8 @@ export interface DI_RETURN_TYPES {
   GetAllIDebtsUseCase: GetAllIDebtsUseCase;
   CreateDebtsCase: CreateDebtsCase;
   DeleteDebtsUseCase: DeleteDebtsUseCase;
+
+  GetAllSavingsUseCase: GetAllSavingsUseCase;
+  DeleteSavingsUseCase: DeleteSavingsUseCase;
+  CreateSavingsCase: CreateSavingsCase;
 }
