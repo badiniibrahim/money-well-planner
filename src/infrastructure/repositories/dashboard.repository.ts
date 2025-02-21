@@ -13,19 +13,28 @@ export class DashboardRepository implements IDashboardRepository {
     }
 
     try {
-      const [userSettings, budgetAggregate, expenseData, budgetRules] =
-        await Promise.all([
-          this.getUserSettings(userId),
-          this.getTotalBudget(userId),
-          this.getExpenseData(userId),
-          this.getBudgetRules(userId),
-        ]);
+      const [
+        userSettings,
+        budgetAggregate,
+        expenseData,
+        budgetRules,
+        debtsData,
+      ] = await Promise.all([
+        this.getUserSettings(userId),
+        this.getTotalBudget(userId),
+        this.getExpenseData(userId),
+        this.getBudgetRules(userId),
+        this.getDebtsData(userId),
+      ]);
 
       const currency = userSettings?.currency || "USD";
       const totalBudget = budgetAggregate._sum.amount ?? 0;
       const totalFixed = this.getSumByType(expenseData, "fixed");
       const totalVariable = this.getSumByType(expenseData, "variable");
-      const remainsBudget = totalBudget - totalFixed - totalVariable;
+      const totalDebt = debtsData._sum.budgetAmount || 0;
+
+      const remainsBudget =
+        totalBudget - totalFixed - totalVariable - totalDebt;
 
       if (!budgetRules) {
         throw new DatabaseOperationError("Budget rules not found");
@@ -37,6 +46,7 @@ export class DashboardRepository implements IDashboardRepository {
         totalVariable,
         budgetRules,
         remainsBudget,
+        totalDebt,
       };
     } catch (error) {
       console.error(`❌ Error in getState (userId: ${userId}):`, error);
@@ -63,6 +73,13 @@ export class DashboardRepository implements IDashboardRepository {
       where: { clerkId: userId },
       _sum: { budgetAmount: true },
       orderBy: { type: "asc" },
+    });
+  }
+
+  private async getDebtsData(userId: string) {
+    return prisma.debts.aggregate({
+      where: { clerkId: userId },
+      _sum: { budgetAmount: true },
     });
   }
 
