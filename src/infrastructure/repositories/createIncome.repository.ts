@@ -184,14 +184,16 @@ export class CreateIncomeRepository implements IIncomeRepository {
       const totalSaving = this.getSumByType(totalSavings, "saving");
       const totalInvest = this.getSumByType(totalSavings, "invest");
 
-      const totalExpenses =
-        totalFixed + totalVariable + totalDebt + totalSaving + totalInvest;
+      const totalExpenses = totalFixed + totalVariable;
+
       const needsPercentage = totalBudget
         ? (totalExpenses / totalBudget) * 100
         : 0;
+
       const savingsPercentage = totalBudget
         ? ((totalSaving + totalInvest + totalDebt) / totalBudget) * 100
         : 0;
+
       const wantsPercentage = totalBudget
         ? (totalPleasure / totalBudget) * 100
         : 0;
