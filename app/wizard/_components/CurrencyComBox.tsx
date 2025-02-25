@@ -21,10 +21,10 @@ import { Currencies, Currency } from "@/constants";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import SkeletonWrapper from "@/components/shared/SkeletonWrapper";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, DollarSign, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// Main Component
-export function CurrencyComBox() {
+export function CurrencyComboBox() {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [selectedOption, setSelectedOption] = useState<Currency | null>(null);
@@ -60,7 +60,7 @@ export function CurrencyComBox() {
       return res.json();
     },
     onSuccess: (data) => {
-      toast.success("Currency updated successfully 🎉", {
+      toast.success("Currency updated successfully", {
         id: "update-currency",
       });
       setSelectedOption(
@@ -68,7 +68,7 @@ export function CurrencyComBox() {
       );
     },
     onError: () => {
-      toast.error("Something went wrong", { id: "update-currency" });
+      toast.error("Failed to update currency", { id: "update-currency" });
     },
   });
 
@@ -87,42 +87,83 @@ export function CurrencyComBox() {
   // Memoized currency options
   const currencyOptions = useMemo(() => Currencies, []);
 
-  if (isDesktop) {
-    return (
-      <SkeletonWrapper isLoading={userSettings.isLoading}>
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full justify-between items-center bg-white border-gray-200 hover:bg-gray-50 text-gray-800 shadow-sm"
-              disabled={mutation.isPending}
-              aria-label="Select currency"
-            >
+  const ComboBox = () => (
+    <SkeletonWrapper isLoading={userSettings.isLoading}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            aria-label="Select currency"
+            className={cn(
+              "w-full justify-between bg-slate-800/50 border-slate-700/50 text-slate-200",
+              "hover:bg-slate-700/50 hover:border-slate-600/50",
+              "focus:ring-offset-slate-900 focus:ring-slate-700"
+            )}
+            disabled={mutation.isPending}
+          >
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-slate-400" />
               {selectedOption ? (
                 <>
                   <span className="font-medium">{selectedOption.label}</span>
-                  <span className="text-gray-500 ml-2">
-                    {selectedOption.value}
+                  <span className="text-slate-400">
+                    ({selectedOption.value})
                   </span>
                 </>
               ) : (
-                <>Set currency</>
+                <span className="text-slate-400">Select currency</span>
               )}
-              {mutation.isPending && (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[220px] p-0 shadow-lg" align="start">
-            <OptionList
-              setOpen={setOpen}
-              setSelectedOption={handleSelectionOption}
-              options={currencyOptions}
+            </div>
+            {mutation.isPending && (
+              <Loader2 className="ml-2 h-4 w-4 animate-spin text-slate-400" />
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-[300px] p-0 bg-slate-800 border-slate-700/50 shadow-lg"
+          align="start"
+        >
+          <Command className="bg-transparent">
+            <CommandInput
+              placeholder="Search currencies..."
+              className="border-none bg-slate-800 text-slate-200 placeholder:text-slate-400"
             />
-          </PopoverContent>
-        </Popover>
-      </SkeletonWrapper>
-    );
+            <CommandList className="max-h-[300px] overflow-auto">
+              <CommandEmpty className="py-6 text-center text-sm text-slate-400">
+                No currency found.
+              </CommandEmpty>
+              <CommandGroup>
+                {currencyOptions.map((currency) => (
+                  <CommandItem
+                    key={currency.value}
+                    value={currency.value}
+                    onSelect={() => {
+                      handleSelectionOption(currency);
+                      setOpen(false);
+                    }}
+                    className="flex items-center justify-between px-4 py-2 cursor-pointer text-slate-200 hover:bg-slate-700/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{currency.label}</span>
+                      <span className="text-slate-400">({currency.value})</span>
+                    </div>
+                    {selectedOption?.value === currency.value && (
+                      <Check className="h-4 w-4 text-emerald-400" />
+                    )}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </SkeletonWrapper>
+  );
+
+  if (isDesktop) {
+    return <ComboBox />;
   }
 
   return (
@@ -131,80 +172,74 @@ export function CurrencyComBox() {
         <DrawerTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between items-center bg-white border-gray-200 hover:bg-gray-50 text-gray-800 shadow-sm"
+            className={cn(
+              "w-full justify-between bg-slate-800/50 border-slate-700/50 text-slate-200",
+              "hover:bg-slate-700/50 hover:border-slate-600/50",
+              "focus:ring-offset-slate-900 focus:ring-slate-700"
+            )}
             disabled={mutation.isPending}
             aria-label="Select currency"
           >
-            {selectedOption ? (
-              <>
-                <span className="font-medium">{selectedOption.label}</span>
-                <span className="text-gray-500 ml-2">
-                  {selectedOption.value}
-                </span>
-              </>
-            ) : (
-              <>Set currency</>
-            )}
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-slate-400" />
+              {selectedOption ? (
+                <>
+                  <span className="font-medium">{selectedOption.label}</span>
+                  <span className="text-slate-400">
+                    ({selectedOption.value})
+                  </span>
+                </>
+              ) : (
+                <span className="text-slate-400">Select currency</span>
+              )}
+            </div>
             {mutation.isPending && (
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              <Loader2 className="ml-2 h-4 w-4 animate-spin text-slate-400" />
             )}
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="border-t rounded-t-xl shadow-lg">
-          <div className="mt-4 p-4 space-y-4">
-            <h2 className="text-lg font-semibold text-gray-800">
+        <DrawerContent className="bg-slate-900 border-t border-slate-700/50">
+          <div className="p-4">
+            <h2 className="text-lg font-semibold text-white mb-4">
               Select Currency
             </h2>
-            <OptionList
-              setOpen={setOpen}
-              setSelectedOption={handleSelectionOption}
-              options={currencyOptions}
-            />
+            <Command className="bg-transparent">
+              <CommandInput
+                placeholder="Search currencies..."
+                className="border-slate-700/50 bg-slate-800/50 text-slate-200 placeholder:text-slate-400 mb-2"
+              />
+              <CommandList className="max-h-[300px] overflow-auto">
+                <CommandEmpty className="py-6 text-center text-sm text-slate-400">
+                  No currency found.
+                </CommandEmpty>
+                <CommandGroup>
+                  {currencyOptions.map((currency) => (
+                    <CommandItem
+                      key={currency.value}
+                      value={currency.value}
+                      onSelect={() => {
+                        handleSelectionOption(currency);
+                        setOpen(false);
+                      }}
+                      className="flex items-center justify-between px-4 py-3 cursor-pointer text-slate-200 hover:bg-slate-800/50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{currency.label}</span>
+                        <span className="text-slate-400">
+                          ({currency.value})
+                        </span>
+                      </div>
+                      {selectedOption?.value === currency.value && (
+                        <Check className="h-4 w-4 text-emerald-400" />
+                      )}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
           </div>
         </DrawerContent>
       </Drawer>
     </SkeletonWrapper>
-  );
-}
-
-// Option List Component
-function OptionList({
-  setOpen,
-  setSelectedOption,
-  options,
-}: {
-  setOpen: (open: boolean) => void;
-  setSelectedOption: (status: Currency | null) => void;
-  options: Currency[];
-}) {
-  return (
-    <Command className="rounded-lg">
-      <CommandInput
-        placeholder="Filter currency..."
-        className="focus:ring-0 focus:border-gray-300"
-      />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup>
-          {options.map((currency) => (
-            <CommandItem
-              key={currency.value}
-              value={currency.value}
-              onSelect={(value) => {
-                setSelectedOption(
-                  options.find((option) => option.value === value) || null
-                );
-                setOpen(false);
-              }}
-              className="cursor-pointer hover:bg-gray-50"
-              aria-label={`Select ${currency.label}`}
-            >
-              <span className="font-medium">{currency.label}</span>
-              <span className="text-gray-500 ml-2">{currency.value}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </Command>
   );
 }

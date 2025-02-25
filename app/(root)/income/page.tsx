@@ -7,9 +7,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllIncome } from "./_actions/actions";
 import AlertComponent from "@/components/shared/AlertComponent";
 import UserIncome from "./_components/UserIncome";
-import { PlusCircle, Loader2, TrendingUp, Calendar } from "lucide-react";
+import {
+  PlusCircle,
+  Loader2,
+  Wallet,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaMoneyBillWave, FaChartLine, FaListAlt } from "react-icons/fa";
 
 function Page() {
   const {
@@ -23,7 +28,11 @@ function Page() {
   });
 
   if (isError && error instanceof Error) {
-    return <AlertComponent message={error.message} />;
+    return (
+      <div className="p-6">
+        <AlertComponent message={error.message} />
+      </div>
+    );
   }
 
   const totalIncome =
@@ -33,84 +42,103 @@ function Page() {
     : 0;
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 p-6">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent flex items-center">
-          Income Management
-        </h1>
-        <CreateIncomeDialog
-          trigger={
-            <Button
-              variant="default"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full transition duration-300 ease-in-out flex items-center"
-            >
-              <PlusCircle className="mr-2 h-5 w-5" />
-              Add Income
-            </Button>
-          }
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Income Management
+            </h1>
+            <p className="text-slate-400">
+              Track and manage your income sources efficiently
+            </p>
+          </div>
+          <CreateIncomeDialog
+            trigger={
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-emerald-500/20 transform hover:scale-105 transition-all duration-300">
+                <PlusCircle className="mr-2 h-5 w-5" />
+                Add New Income
+              </Button>
+            }
+          />
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Total Income
-            </CardTitle>
-            <FaMoneyBillWave className="h-5 w-5 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {incomeData?.currency} {totalIncome.toFixed(2)}
-            </div>
-            <p className="text-xs text-slate-400">+20.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Average Income
-            </CardTitle>
-            <FaChartLine className="h-5 w-5 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {incomeData?.currency} {averageIncome.toFixed(2)}
-            </div>
-            <p className="text-xs text-slate-400">Per income source</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Income Sources
-            </CardTitle>
-            <FaListAlt className="h-5 w-5 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {incomeData?.incomes.length || 0}
-            </div>
-            <p className="text-xs text-slate-400">Active income streams</p>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Total Income
+              </CardTitle>
+              <Wallet className="h-5 w-5 text-emerald-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {incomeData?.currency}{" "}
+                {totalIncome.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+              <p className="text-xs text-emerald-400 flex items-center gap-1 mt-1">
+                <TrendingUp className="h-3 w-3" />
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
 
-      <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-       
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Average Income
+              </CardTitle>
+              <BarChart3 className="h-5 w-5 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {incomeData?.currency}{" "}
+                {averageIncome.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Per income source</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Active Sources
+              </CardTitle>
+              <div className="h-8 w-8 rounded-full bg-purple-400/10 flex items-center justify-center">
+                <span className="text-lg font-bold text-purple-400">
+                  {incomeData?.incomes.length || 0}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                Income Streams
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Currently tracking</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+              <p className="text-slate-400">Loading income data...</p>
             </div>
-          ) : incomeData ? (
-            <UserIncome
-              incomes={incomeData.incomes}
-              currency={incomeData.currency}
-            />
-          ) : null}
-        </CardContent>
-      </Card>
+          </div>
+        ) : incomeData ? (
+          <UserIncome
+            incomes={incomeData.incomes}
+            currency={incomeData.currency}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

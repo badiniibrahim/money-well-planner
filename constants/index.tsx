@@ -7,7 +7,7 @@ import {
   FaUserCircle,
   FaGlassCheers,
 } from "react-icons/fa";
-import { AiOutlineAppstore } from "react-icons/ai";
+import { AiOutlineAppstore, AiFillSetting } from "react-icons/ai";
 
 export const Currencies = [
   { value: "USD", label: "$ Dollar", locale: "en-US" },
@@ -62,8 +62,8 @@ export const sidebarLinks = [
     label: "Upgrade",
   },
   {
-    icon: FaUserCircle,
-    route: "/profile",
-    label: "Profile",
+    icon: AiFillSetting,
+    route: "/settings",
+    label: "Settings",
   },
 ];

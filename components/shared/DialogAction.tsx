@@ -10,9 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVerticalIcon, TrashIcon } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import { DeleteAlertDialog } from "@/components/shared/DeleteAlertDialog";
 import { UseMutationResult } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 type Props = {
   entityName: string;
@@ -41,24 +42,38 @@ function DialogAction({
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size={"sm"}>
-            <div
-              className="flex items-center justify-center 
-            w-full h-full"
-            >
-              <MoreVerticalIcon size={18} />
-            </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-8 w-8 p-0 text-slate-400",
+              "hover:bg-slate-800/50 hover:text-slate-300",
+              "focus:ring-slate-700/50 focus:ring-offset-slate-900",
+              "data-[state=open]:bg-slate-800/50 data-[state=open]:text-slate-300"
+            )}
+          >
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent
+          align="end"
+          className="w-48 bg-slate-800 border-slate-700/50"
+        >
+          <DropdownMenuLabel className="text-slate-300">
+            Actions
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-slate-700/50" />
           <DropdownMenuItem
-            onSelect={() => setShowDialog((prev) => !prev)}
-            className="text-destructive flex items-center gap-2"
+            onSelect={() => setShowDialog(true)}
+            className={cn(
+              "flex items-center gap-2 text-rose-400 cursor-pointer",
+              "hover:text-rose-300 hover:bg-slate-700/50",
+              "focus:bg-slate-700/50"
+            )}
           >
-            <TrashIcon size={16} />
-            Delete
+            <Trash2 className="h-4 w-4" />
+            <span>Delete</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -1,10 +1,11 @@
 "use client";
 
-import { InboxIcon } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import React from "react";
 import { Debts } from "@prisma/client";
 import { DebtsTable } from "./DebtsTable";
 import AlertComponent from "@/components/shared/AlertComponent";
+import { Card } from "@/components/ui/card";
 
 type Props = {
   debts: Debts[];
@@ -14,34 +15,37 @@ type Props = {
 function UserDebts({ debts, currency }: Props) {
   if (!debts) {
     return (
-      <AlertComponent message="Something went wrong. Please try again later." />
+      <Card className="bg-slate-900/50 border-slate-700/50">
+        <div className="p-6">
+          <AlertComponent message="Something went wrong. Please try again later." />
+        </div>
+      </Card>
     );
   }
 
   if (debts.length === 0) {
     return (
-      <>
-        <div className="flex flex-col gap-4 h-full items-center justify-center">
-          <div className="rounded-full bg-accent w-20 h-20 flex items-center justify-center">
-            <InboxIcon size={40} className="stroke-primary" />
+      <Card className="bg-slate-900/50 border-slate-700/50">
+        <div className="flex flex-col items-center justify-center p-12 text-center">
+          <div className="rounded-full bg-slate-800/50 w-24 h-24 flex items-center justify-center mb-6 border border-slate-700/50">
+            <CreditCard className="h-12 w-12 text-rose-400" />
           </div>
-          <div className="flex flex-col gap-1 text-center">
-            <p className="font-bold">No Fixed debts created yet</p>
-            <p className="text-sm text-muted-foreground">
-              Click the button below to add your first debts
-            </p>
-          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">
+            No Debts Tracked Yet
+          </h3>
+          <p className="text-slate-400 max-w-sm">
+            Start managing your debts by adding your first entry. Click the "Add
+            New Debt" button above to begin tracking your payments and progress.
+          </p>
         </div>
-      </>
+      </Card>
     );
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-4 mt-5">
-        <DebtsTable debts={debts} currency={currency} />
-      </div>
-    </>
+    <div className="space-y-6">
+      <DebtsTable debts={debts} currency={currency} />
+    </div>
   );
 }
 

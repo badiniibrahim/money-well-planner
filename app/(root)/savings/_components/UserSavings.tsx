@@ -1,10 +1,11 @@
 "use client";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, InboxIcon } from "lucide-react";
+
+import { PiggyBank } from "lucide-react";
 import React from "react";
 import { Savings } from "@prisma/client";
 import { SavingsTable } from "./SavingsTable";
 import AlertComponent from "@/components/shared/AlertComponent";
+import { Card } from "@/components/ui/card";
 
 type Props = {
   savings: Savings[];
@@ -14,35 +15,38 @@ type Props = {
 function UserSavings({ savings, currency }: Props) {
   if (!savings) {
     return (
-      <AlertComponent message="Something went wrong. Please try again later." />
+      <Card className="bg-slate-900/50 border-slate-700/50">
+        <div className="p-6">
+          <AlertComponent message="Something went wrong. Please try again later." />
+        </div>
+      </Card>
     );
   }
 
   if (savings.length === 0) {
     return (
-      <>
-        <div className="flex flex-col gap-4 h-full items-center justify-center">
-          <div className="rounded-full bg-accent w-20 h-20 flex items-center justify-center">
-            <InboxIcon size={40} className="stroke-primary" />
+      <Card className="bg-slate-900/50 border-slate-700/50">
+        <div className="flex flex-col items-center justify-center p-12 text-center">
+          <div className="rounded-full bg-slate-800/50 w-24 h-24 flex items-center justify-center mb-6 border border-slate-700/50">
+            <PiggyBank className="h-12 w-12 text-blue-400" />
           </div>
-          <div className="flex flex-col gap-1 text-center">
-            <p className="font-bold">No savings or investments created yet</p>
-            <p className="text-sm text-muted-foreground">
-              Click the button below to add your first savings or investments
-              created
-            </p>
-          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">
+            No Savings or Investments Yet
+          </h3>
+          <p className="text-slate-400 max-w-sm">
+            Start building your financial future by adding your first savings
+            goal or investment. Click the "Add New" button above to begin
+            growing your wealth.
+          </p>
         </div>
-      </>
+      </Card>
     );
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-4 mt-5">
-        <SavingsTable savings={savings} currency={currency} />
-      </div>
-    </>
+    <div className="space-y-6">
+      <SavingsTable savings={savings} currency={currency} />
+    </div>
   );
 }
 

@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -22,7 +23,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  HeartHandshake,
+  PlusCircle,
+  X,
+  DollarSign,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
 import {
   PleasuresSchema,
   PleasuresType,
@@ -48,19 +56,23 @@ function CreatePleasuresDialog({ trigger }: Props) {
   const { mutate, isPending } = useMutation({
     mutationFn: createPleasure,
     onSuccess: () => {
-      toast.success("pleasure created", { id: "create-Debt" });
+      toast.success("Pleasure budget created successfully", {
+        id: "create-pleasure",
+      });
       form.reset();
       setDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: ["getAllPleasure"] });
     },
     onError: () => {
-      toast.error("Failed to create pleasure", { id: "create-pleasure" });
+      toast.error("Failed to create pleasure budget", {
+        id: "create-pleasure",
+      });
     },
   });
 
   const onSubmit = useCallback(
     (values: PleasuresType) => {
-      //toast.loading("Creating pleasure...", { id: "create-pleasure" });
+      toast.loading("Creating pleasure budget...", { id: "create-pleasure" });
       mutate(values);
     },
     [mutate]
@@ -71,29 +83,50 @@ function CreatePleasuresDialog({ trigger }: Props) {
       <DialogTrigger asChild onClick={() => setDialogOpen(true)}>
         {trigger}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 border border-slate-700/50 text-white">
+        <div className="absolute right-4 top-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
+            onClick={() => setDialogOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
         <DialogHeader>
-          <DialogTitle>
-            Create a new{" "}
-            <span className="text-primary">pleasures and reserve funds</span>
+          <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-purple-400">
+            <HeartHandshake className="h-6 w-6" />
+            New Pleasure Budget
           </DialogTitle>
+          <DialogDescription className="text-slate-300">
+            Set aside funds for your pleasures and personal enjoyment.
+          </DialogDescription>
         </DialogHeader>
 
-        <div>
+        <Card className="bg-slate-800/50 border-slate-700/50 mt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6 p-6"
+            >
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex gap-1 items-center">
-                      Name
+                    <FormLabel className="text-sm font-medium text-slate-200">
+                      Category Name
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="name" {...field} />
+                      <Input
+                        placeholder="e.g. Travel, Hobbies, Entertainment"
+                        {...field}
+                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-purple-500 focus:ring-purple-500"
+                      />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-400 text-xs mt-1" />
                   </FormItem>
                 )}
               />
@@ -102,24 +135,45 @@ function CreatePleasuresDialog({ trigger }: Props) {
                 name="budgetAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex gap-1 items-center">
-                      Budget
+                    <FormLabel className="text-sm font-medium text-slate-200">
+                      Budget Amount
                     </FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="amount" {...field} />
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          {...field}
+                          className="pl-10 bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-purple-500 focus:ring-purple-500"
+                        />
+                      </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-400 text-xs mt-1" />
                   </FormItem>
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {!isPending && "Create"}
-                {isPending && <Loader2 className="animate-spin" />}
+              <Button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={isPending}
+              >
+                {!isPending ? (
+                  <>
+                    <PlusCircle className="h-5 w-5" />
+                    Create Budget
+                  </>
+                ) : (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Processing...
+                  </>
+                )}
               </Button>
             </form>
           </Form>
-        </div>
+        </Card>
       </DialogContent>
     </Dialog>
   );

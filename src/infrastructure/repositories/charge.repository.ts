@@ -74,6 +74,33 @@ export class CreateChargeRepository implements IChargeRepository {
         }),
       ]);
 
+      const totalExpenses = expenses.reduce(
+        (sum, exp) => sum + exp.budgetAmount,
+        0
+      );
+      const categorySummary = expenses.reduce((acc, exp) => {
+        acc[exp.type] = (acc[exp.type] || 0) + exp.budgetAmount;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // ✅ Identifier la catégorie dominante
+      const sortedCategories = Object.entries(categorySummary).sort(
+        (a, b) => b[1] - a[1]
+      );
+      const topCategory = sortedCategories[0]
+        ? sortedCategories[0][0]
+        : "inconnue";
+      const topCategoryAmount = sortedCategories[0]
+        ? sortedCategories[0][1]
+        : 0;
+
+      console.log({
+        totalExpenses,
+        categorySummary,
+        sortedCategories,
+        topCategory,
+        topCategoryAmount,
+      });
       return {
         currency: userSettings?.currency || "USD",
         expense: expenses,

@@ -7,11 +7,16 @@ import AlertComponent from "@/components/shared/AlertComponent";
 import CreateDebtsDialog from "./_components/CreateDebtsDialog";
 import { Button } from "@/components/ui/button";
 import UserDebts from "./_components/UserDebts";
-import { Loader2, PlusCircle } from "lucide-react";
+import {
+  PlusCircle,
+  Loader2,
+  CreditCard,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaMoneyBillWave, FaChartLine, FaListAlt } from "react-icons/fa";
 
-function page() {
+function DebtsPage() {
   const {
     data: debtsData,
     isLoading,
@@ -23,8 +28,13 @@ function page() {
   });
 
   if (isError && error instanceof Error) {
-    return <AlertComponent message={error.message} />;
+    return (
+      <div className="p-6">
+        <AlertComponent message={error.message} />
+      </div>
+    );
   }
+
   const totalDebts =
     debtsData?.debts.reduce((sum, debt) => sum + debt.budgetAmount, 0) || 0;
   const averageDebts = debtsData?.debts.length
@@ -33,80 +43,100 @@ function page() {
   const debtsSources = debtsData?.debts.length || 0;
 
   return (
-    <div className="flex flex-col h-full p-6 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent flex items-center">
-          Debts
-        </h1>
-        <div className="flex space-x-2">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Debt Management
+            </h1>
+            <p className="text-slate-400">
+              Track and manage your debts to achieve financial freedom
+            </p>
+          </div>
           <CreateDebtsDialog
             trigger={
-              <Button
-                variant="default"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full transition duration-300 ease-in-out flex items-center"
-              >
+              <Button className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-rose-500/20 transform hover:scale-105 transition-all duration-300">
                 <PlusCircle className="mr-2 h-5 w-5" />
-                Add new debt
+                Add New Debt
               </Button>
             }
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Total Debts
-            </CardTitle>
-            <FaMoneyBillWave className="h-5 w-5 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {debtsData?.currency} {totalDebts.toFixed(2)}
-            </div>
-            <p className="text-xs text-slate-400">+20.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Average Debts
-            </CardTitle>
-            <FaChartLine className="h-5 w-5 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {debtsData?.currency} {averageDebts.toFixed(2)}
-            </div>
-            <p className="text-xs text-slate-400">Per debt source</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Debts Sources
-            </CardTitle>
-            <FaListAlt className="h-5 w-5 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{debtsSources}</div>
-            <p className="text-xs text-slate-400">Active debt streams</p>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Total Debt
+              </CardTitle>
+              <CreditCard className="h-5 w-5 text-rose-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {debtsData?.currency}{" "}
+                {totalDebts.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+              <p className="text-xs text-rose-400 flex items-center gap-1 mt-1">
+                <TrendingUp className="h-3 w-3" />
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
 
-      <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl rounded-lg">
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Average Debt
+              </CardTitle>
+              <BarChart3 className="h-5 w-5 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {debtsData?.currency}{" "}
+                {averageDebts.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Per debt source</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Active Debts
+              </CardTitle>
+              <div className="h-8 w-8 rounded-full bg-purple-400/10 flex items-center justify-center">
+                <span className="text-lg font-bold text-purple-400">
+                  {debtsSources}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">Total Debts</div>
+              <p className="text-xs text-slate-400 mt-1">Currently tracking</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-rose-400" />
+              <p className="text-slate-400">Loading debt data...</p>
+            </div>
           </div>
         ) : debtsData ? (
           <UserDebts debts={debtsData.debts} currency={debtsData.currency} />
         ) : null}
-      </Card>
+      </div>
     </div>
   );
 }
 
-export default page;
+export default DebtsPage;

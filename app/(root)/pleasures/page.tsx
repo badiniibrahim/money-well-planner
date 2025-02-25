@@ -4,14 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { getAllPleasure } from "./_actions/actions";
 import AlertComponent from "@/components/shared/AlertComponent";
-import CreatePleasuresDialog from "./_components/CreatPleasuresDialog";
 import { Button } from "@/components/ui/button";
 import UserPleasures from "./_components/UserPleasures";
-import { Loader2, PlusCircle } from "lucide-react";
+import {
+  PlusCircle,
+  Loader2,
+  HeartHandshake,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaMoneyBillWave, FaChartLine, FaListAlt } from "react-icons/fa";
+import CreatePleasuresDialog from "./_components/CreatPleasuresDialog";
 
-function page() {
+function PleasuresPage() {
   const {
     data: pleasureData,
     isLoading,
@@ -23,7 +28,11 @@ function page() {
   });
 
   if (isError && error instanceof Error) {
-    return <AlertComponent message={error.message} />;
+    return (
+      <div className="p-6">
+        <AlertComponent message={error.message} />
+      </div>
+    );
   }
 
   const totalPleasures =
@@ -37,75 +46,97 @@ function page() {
   const pleasuresSources = pleasureData?.pleasure.length || 0;
 
   return (
-    <div className="flex h-full flex-col p-6 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent flex items-center">
-          Pleasures and Reserve Funds
-        </h1>
-        <div className="flex space-x-2">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Pleasure Budget
+            </h1>
+            <p className="text-slate-400">
+              Set aside funds for your enjoyment and personal activities
+            </p>
+          </div>
           <CreatePleasuresDialog
             trigger={
-              <Button
-                variant="default"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full transition duration-300 ease-in-out flex items-center"
-              >
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-purple-500/20 transform hover:scale-105 transition-all duration-300">
                 <PlusCircle className="mr-2 h-5 w-5" />
-                Add new pleasures
+                Add New Budget
               </Button>
             }
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Total Pleasures
-            </CardTitle>
-            <FaMoneyBillWave className="h-5 w-5 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {pleasureData?.currency} {totalPleasures.toFixed(2)}
-            </div>
-            <p className="text-xs text-slate-400">+20.1% from last month</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Average Pleasures
-            </CardTitle>
-            <FaChartLine className="h-5 w-5 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {pleasureData?.currency} {averagePleasures.toFixed(2)}
-            </div>
-            <p className="text-xs text-slate-400">Per pleasure source</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Pleasures Sources
-            </CardTitle>
-            <FaListAlt className="h-5 w-5 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {pleasuresSources}
-            </div>
-            <p className="text-xs text-slate-400">Active pleasure streams</p>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Total Budget
+              </CardTitle>
+              <HeartHandshake className="h-5 w-5 text-purple-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {pleasureData?.currency}{" "}
+                {totalPleasures.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+              <p className="text-xs text-purple-400 flex items-center gap-1 mt-1">
+                <TrendingUp className="h-3 w-3" />
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
 
-      <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl rounded-lg">
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Average Budget
+              </CardTitle>
+              <BarChart3 className="h-5 w-5 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {pleasureData?.currency}{" "}
+                {averagePleasures.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Per pleasure category
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-colors duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">
+                Active Categories
+              </CardTitle>
+              <div className="h-8 w-8 rounded-full bg-purple-400/10 flex items-center justify-center">
+                <span className="text-lg font-bold text-purple-400">
+                  {pleasuresSources}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                Budget Categories
+              </div>
+              <p className="text-xs text-slate-400 mt-1">Currently tracking</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+              <p className="text-slate-400">Loading pleasure budgets...</p>
+            </div>
           </div>
         ) : pleasureData ? (
           <UserPleasures
@@ -113,9 +144,9 @@ function page() {
             currency={pleasureData.currency}
           />
         ) : null}
-      </Card>
+      </div>
     </div>
   );
 }
 
-export default page;
+export default PleasuresPage;

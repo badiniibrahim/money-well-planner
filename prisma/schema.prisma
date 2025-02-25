@@ -138,7 +138,7 @@ model DailyAdvice {
   id        Int      @id @default(autoincrement())
   advice    String
   createdAt DateTime @default(now())
-  clerkId   String
+  clerkId   String   @unique
 
   user User @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
 

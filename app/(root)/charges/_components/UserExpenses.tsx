@@ -1,11 +1,11 @@
 "use client";
 
-import { InboxIcon } from "lucide-react";
+import { Receipt } from "lucide-react";
 import React from "react";
 import { Expense } from "@prisma/client";
 import { ExpensesTable } from "./ExpensesTable";
 import AlertComponent from "@/components/shared/AlertComponent";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 type Props = {
   expenses: Expense[];
@@ -15,31 +15,35 @@ type Props = {
 function UserFixedExpenses({ expenses, currency }: Props) {
   if (!expenses) {
     return (
-      <AlertComponent message="Something went wrong. Please try again later." />
+      <Card className="bg-slate-900/50 border-slate-700/50">
+        <div className="p-6">
+          <AlertComponent message="Something went wrong. Please try again later." />
+        </div>
+      </Card>
     );
   }
 
   if (expenses.length === 0) {
     return (
-      <div className="bg-slate-900  shadow-lg">
-        <div className="flex flex-col items-center justify-center h-64 text-center">
-          <div className="rounded-full bg-blue-500/20 w-20 h-20 flex items-center justify-center mb-4">
-            <InboxIcon size={40} className="text-blue-400" />
+      <Card className="bg-slate-900/50 border-slate-700/50">
+        <div className="flex flex-col items-center justify-center p-12 text-center">
+          <div className="rounded-full bg-slate-800/50 w-24 h-24 flex items-center justify-center mb-6 border border-slate-700/50">
+            <Receipt className="h-12 w-12 text-rose-400" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">
+          <h3 className="text-2xl font-bold text-white mb-2">
             No Expenses Created Yet
           </h3>
-          <p className="text-sm text-slate-400 max-w-sm">
-            Start managing your finances by adding your first expense. Use the
-            buttons above to get started.
+          <p className="text-slate-400 max-w-sm">
+            Start managing your expenses by adding your first entry. Click the
+            "Add New Expense" button above to begin tracking your spending.
           </p>
         </div>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="mt-6">
+    <div className="space-y-6">
       <ExpensesTable expenses={expenses} currency={currency} />
     </div>
   );
