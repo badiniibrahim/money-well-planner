@@ -74,33 +74,6 @@ export class CreateChargeRepository implements IChargeRepository {
         }),
       ]);
 
-      const totalExpenses = expenses.reduce(
-        (sum, exp) => sum + exp.budgetAmount,
-        0
-      );
-      const categorySummary = expenses.reduce((acc, exp) => {
-        acc[exp.type] = (acc[exp.type] || 0) + exp.budgetAmount;
-        return acc;
-      }, {} as Record<string, number>);
-
-      // ✅ Identifier la catégorie dominante
-      const sortedCategories = Object.entries(categorySummary).sort(
-        (a, b) => b[1] - a[1]
-      );
-      const topCategory = sortedCategories[0]
-        ? sortedCategories[0][0]
-        : "inconnue";
-      const topCategoryAmount = sortedCategories[0]
-        ? sortedCategories[0][1]
-        : 0;
-
-      console.log({
-        totalExpenses,
-        categorySummary,
-        sortedCategories,
-        topCategory,
-        topCategoryAmount,
-      });
       return {
         currency: userSettings?.currency || "USD",
         expense: expenses,
@@ -152,24 +125,18 @@ export class CreateChargeRepository implements IChargeRepository {
 
   private async updateBudgetRules(tx: any, userId: string): Promise<void> {
     try {
-      const [budget, budgetRules, totalExpenses, totalSavings] =
-        await Promise.all([
-          tx.budget.aggregate({
-            where: { clerkId: userId },
-            _sum: { amount: true },
-          }),
-          tx.budgetRule.findFirst({ where: { clerkId: userId } }),
-          tx.expense.groupBy({
-            by: ["type"],
-            where: { clerkId: userId },
-            _sum: { budgetAmount: true },
-          }),
-          tx.savings.groupBy({
-            by: ["type"],
-            where: { clerkId: userId },
-            _sum: { budgetAmount: true },
-          }),
-        ]);
+      const [budget, budgetRules, totalExpenses] = await Promise.all([
+        tx.budget.aggregate({
+          where: { clerkId: userId },
+          _sum: { amount: true },
+        }),
+        tx.budgetRule.findFirst({ where: { clerkId: userId } }),
+        tx.expense.groupBy({
+          by: ["type"],
+          where: { clerkId: userId },
+          _sum: { budgetAmount: true },
+        }),
+      ]);
 
       if (!budget || !budgetRules) {
         throw new NotFoundError("Budget or budget rules not found.");
@@ -178,20 +145,16 @@ export class CreateChargeRepository implements IChargeRepository {
       const totalBudget = budget._sum.amount ?? 0;
       const totalFixed = this.getSumByType(totalExpenses, "fixed");
       const totalVariable = this.getSumByType(totalExpenses, "variable");
-      const totalSaving = this.getSumByType(totalSavings, "saving");
-      const totalInvest = this.getSumByType(totalSavings, "invest");
 
       const totalExpensesAmount = totalFixed + totalVariable;
+      console.log({ totalExpensesAmount, totalBudget });
       const needsPercentage =
         totalBudget > 0 ? (totalExpensesAmount / totalBudget) * 100 : 0;
-      const savingsPercentage =
-        totalBudget > 0 ? ((totalSaving + totalInvest) / totalBudget) * 100 : 0;
 
       await tx.budgetRule.upsert({
         where: { id: budgetRules.id },
         update: {
           actualNeedsPercentage: needsPercentage,
-          // actualSavingsPercentage: savingsPercentage,
         },
         create: {
           needsPercentage: 50,

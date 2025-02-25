@@ -52,7 +52,7 @@ export class DashboardRepository implements IDashboardRepository {
         totalSaving +
         totalInvest +
         totalPleasure;
-      const remainsBudget = Math.max(totalBudget - totalExpenses, 0); // Évite d'avoir un budget négatif
+      const remainsBudget = Math.max(totalBudget - totalExpenses, 0);
 
       if (!budgetRules) {
         throw new DatabaseOperationError("Budget rules not found");
