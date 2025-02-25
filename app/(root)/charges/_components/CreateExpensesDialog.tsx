@@ -29,14 +29,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
   ExpensesSchema,
   ExpensesType,
 } from "@/src/entities/models/charges/expense";
-
 import { createCharge } from "../../charges/_actions/actions";
 
 type ExpenseType = "fixed" | "variable";
@@ -91,29 +89,29 @@ function CreateExpensesDialog({ trigger, type }: Props) {
       <DialogTrigger asChild onClick={() => setDialogOpen(true)}>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white">
+      <DialogContent className="bg-background border-border">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">
-            New {type} expense
+          <DialogTitle className="text-2xl font-semibold tracking-tight">
+            New {type.charAt(0).toUpperCase() + type.slice(1)} Expense
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-slate-200">Name</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter expense name"
                       {...field}
-                      className="bg-slate-800 border-slate-700 text-white placeholder-slate-400"
+                      className="bg-muted/50"
                     />
                   </FormControl>
-                  <FormMessage className="text-red-400" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -122,19 +120,19 @@ function CreateExpensesDialog({ trigger, type }: Props) {
               name="budgetAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-slate-200">Amount</FormLabel>
+                  <FormLabel>Amount</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                       <Input
                         type="number"
                         placeholder="0.00"
                         {...field}
-                        className="bg-slate-800 border-slate-700 text-white placeholder-slate-400 pl-10"
+                        className="bg-muted/50 pl-10"
                       />
                     </div>
                   </FormControl>
-                  <FormMessage className="text-red-400" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -145,15 +143,15 @@ function CreateExpensesDialog({ trigger, type }: Props) {
                 name="dueDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-200">Due date</FormLabel>
+                    <FormLabel>Due date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant="outline"
                             className={cn(
-                              "w-full bg-slate-800 border-slate-700 text-white",
-                              !field.value && "text-slate-400"
+                              "w-full justify-start text-left font-normal bg-muted/50",
+                              !field.value && "text-muted-foreground"
                             )}
                           >
                             {field.value ? (
@@ -165,29 +163,34 @@ function CreateExpensesDialog({ trigger, type }: Props) {
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-slate-800 border-slate-700">
+                      <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
                           initialFocus
-                          className="bg-slate-800 text-white"
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormMessage className="text-red-400" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             )}
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full"
               disabled={isPending}
+              size="lg"
             >
-              {!isPending && "Create Expense"}
-              {isPending && <Loader2 className="animate-spin mr-2" />}
-              {isPending && "Creating..."}
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Expense"
+              )}
             </Button>
           </form>
         </Form>

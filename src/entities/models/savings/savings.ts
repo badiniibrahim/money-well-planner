@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const SavingsSchema = z.object({
   budgetAmount: z.coerce.number().positive().multipleOf(0.01),
-  name: z.string(),
+  name: z.string().min(3),
   type: z.union([z.literal("invest"), z.literal("saving")]),
 });
 

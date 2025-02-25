@@ -128,7 +128,7 @@ export class CreateDebtsRepository implements IDebtsRepository {
   }
 
   private async updateBudgetRules(tx: any, userId: string): Promise<void> {
-    const [budget, budgetRules, totalDebts] = await Promise.all([
+    const [budget, budgetRules, totalDebts, totalSavings] = await Promise.all([
       tx.budget.aggregate({
         where: { clerkId: userId },
         _sum: { amount: true },
@@ -138,16 +138,40 @@ export class CreateDebtsRepository implements IDebtsRepository {
         where: { clerkId: userId },
         _sum: { budgetAmount: true },
       }),
+      tx.savings.groupBy({
+        by: ["type"],
+        where: { clerkId: userId },
+        _sum: { budgetAmount: true },
+      }),
     ]);
 
     if (!budget || !budgetRules) {
       throw new NotFoundError("Budget or budget rules not found.");
     }
 
+    let totalSaving = 0;
+    let totalInvest = 0;
+
+    totalSavings.forEach(
+      (t: { type: string; _sum: { budgetAmount: number } }) => {
+        if (t.type === "saving") {
+          totalSaving = t._sum.budgetAmount ?? 0;
+        }
+        if (t.type === "invest") {
+          totalInvest = t._sum.budgetAmount ?? 0;
+        }
+      }
+    );
+
     const totalBudget = budget._sum.amount ?? 0;
     const totalDebt = totalDebts._sum.budgetAmount ?? 0;
+    const totalSavingAndInvest = totalSaving + totalInvest;
+
+    // Ne pas mettre à zéro si le budget est vide
     const savingsPercentage =
-      totalBudget > 0 ? (totalDebt / totalBudget) * 100 : 0;
+      totalBudget > 0
+        ? ((totalDebt + totalSavingAndInvest) / totalBudget) * 100
+        : budgetRules.actualSavingsPercentage;
 
     await tx.budgetRule.upsert({
       where: { id: budgetRules.id },
@@ -157,7 +181,7 @@ export class CreateDebtsRepository implements IDebtsRepository {
         savingsPercentage: 30,
         wantsPercentage: 20,
         actualNeedsPercentage: 0,
-        actualSavingsPercentage: savingsPercentage,
+        actualSavingsPercentage: 0,
         actualWantsPercentage: 0,
         clerkId: userId,
       },

@@ -126,7 +126,7 @@ export class CreateSavingsRepository implements ISavingsRepository {
   }
 
   private async updateBudgetRules(tx: any, userId: string): Promise<void> {
-    const [budget, budgetRules, totalSavings] = await Promise.all([
+    const [budget, budgetRules, totalSavings, totalDebts] = await Promise.all([
       tx.budget.aggregate({
         where: { clerkId: userId },
         _sum: { amount: true },
@@ -137,6 +137,10 @@ export class CreateSavingsRepository implements ISavingsRepository {
         where: { clerkId: userId },
         _sum: { budgetAmount: true },
       }),
+      tx.debts.aggregate({
+        where: { clerkId: userId },
+        _sum: { budgetAmount: true },
+      }),
     ]);
 
     if (!budget || !budgetRules) {
@@ -144,14 +148,29 @@ export class CreateSavingsRepository implements ISavingsRepository {
     }
 
     const totalBudget = budget._sum.amount ?? 0;
-    const totalSaving =
-      totalSavings.find((t: { type: string }) => t.type === "saving")?._sum
-        ?.budgetAmount ?? 0;
-    const totalInvest =
-      totalSavings.find((t: { type: string }) => t.type === "invest")?._sum
-        ?.budgetAmount ?? 0;
-    const total = totalSaving + totalInvest;
-    const savingsPercentage = totalBudget > 0 ? (total / totalBudget) * 100 : 0;
+    const totalDebt = totalDebts._sum.budgetAmount ?? 0;
+
+    let totalSaving = 0;
+    let totalInvest = 0;
+
+    totalSavings.forEach(
+      (t: { type: string; _sum: { budgetAmount: number } }) => {
+        if (t.type === "saving") {
+          totalSaving = t._sum.budgetAmount ?? 0;
+        }
+        if (t.type === "invest") {
+          totalInvest = t._sum.budgetAmount ?? 0;
+        }
+      }
+    );
+
+    const total = totalSaving + totalInvest + totalDebt;
+
+    // Ne pas écraser si le budget est vide
+    const savingsPercentage =
+      totalBudget > 0
+        ? (total / totalBudget) * 100
+        : budgetRules.actualSavingsPercentage;
 
     await tx.budgetRule.upsert({
       where: { id: budgetRules.id },
@@ -161,7 +180,7 @@ export class CreateSavingsRepository implements ISavingsRepository {
         savingsPercentage: 30,
         wantsPercentage: 20,
         actualNeedsPercentage: 0,
-        actualSavingsPercentage: savingsPercentage,
+        actualSavingsPercentage: 0,
         actualWantsPercentage: 0,
         clerkId: userId,
       },

@@ -97,9 +97,7 @@ function Page() {
       </div>
 
       <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="text-white">Income Details</CardTitle>
-        </CardHeader>
+       
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center h-64">

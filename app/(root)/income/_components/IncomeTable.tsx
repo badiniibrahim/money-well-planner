@@ -136,9 +136,9 @@ export function IncomeTable({ budgets = [], currency }: Props) {
   });
 
   return (
-    <Card className="w-full bg-slate-900 text-slate-200 shadow-lg">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-2xl font-bold text-white">Income</CardTitle>
+    <div className="">
+      <div className="flex items-center justify-between mb-6">
+        <div className="text-2xl font-bold text-white">Income</div>
         <div className="relative">
           <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
@@ -148,8 +148,8 @@ export function IncomeTable({ budgets = [], currency }: Props) {
             className="pl-8 bg-slate-800 text-slate-200 border-slate-700 focus:border-blue-500"
           />
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div>
         <div className="rounded-lg border border-slate-700 overflow-hidden">
           <Table>
             <TableHeader className="bg-slate-800">
@@ -201,7 +201,7 @@ export function IncomeTable({ budgets = [], currency }: Props) {
             </TableBody>
           </Table>
         </div>
-      </CardContent>
+      </div>
       <CardFooter className="flex items-center justify-between">
         <div className="flex-1 text-sm text-slate-400">
           Showing{" "}
@@ -237,6 +237,6 @@ export function IncomeTable({ budgets = [], currency }: Props) {
           </Button>
         </div>
       </CardFooter>
-    </Card>
+    </div>
   );
 }
