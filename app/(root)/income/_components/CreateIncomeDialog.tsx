@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -72,14 +73,17 @@ function CreateIncomeDialog({ trigger }: Props) {
       <DialogTrigger asChild onClick={() => setDialogOpen(true)}>
         {trigger}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-slate-900 border-slate-800 text-white">
+      <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 text-white transition-all duration-300 ease-in-out">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white">
             Add New Income
           </DialogTitle>
+          <DialogDescription className="text-gray-400">
+            Enter the details of your new income source below.
+          </DialogDescription>
         </DialogHeader>
 
-        <Card className="bg-slate-800 border-slate-700 mt-6">
+        <Card className="bg-gray-700 border-gray-600 mt-6">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -90,14 +94,15 @@ function CreateIncomeDialog({ trigger }: Props) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-slate-300">
+                    <FormLabel className="text-sm font-medium text-gray-300">
                       Income Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g. Salary, Freelance"
                         {...field}
-                        className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
+                        className="bg-gray-600 border-gray-500 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                        aria-label="Income name"
                       />
                     </FormControl>
                     <FormMessage className="text-red-400 text-xs mt-1" />
@@ -109,17 +114,18 @@ function CreateIncomeDialog({ trigger }: Props) {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-slate-300">
+                    <FormLabel className="text-sm font-medium text-gray-300">
                       Amount
                     </FormLabel>
                     <FormControl>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                      <div className="relative flex items-center">
+                        <DollarSign className="absolute left-3 text-gray-400" />
                         <Input
                           type="number"
                           placeholder="0.00"
                           {...field}
-                          className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                          className="bg-gray-600 border-gray-500 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                          aria-label="Income amount"
                         />
                       </div>
                     </FormControl>

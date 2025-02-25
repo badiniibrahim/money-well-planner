@@ -74,10 +74,9 @@ export function ExpensesTable({ expenses = [], currency }: Props) {
       cell: ({ row }) => (
         <div
           className={cn(
-            "capitalize w-[100px] rounded-full text-center px-3 py-1 text-sm font-medium",
-            row.original.type === "fixed"
-              ? "bg-green-500/20 text-green-400"
-              : "bg-red-500/20 text-red-400"
+            "capitalize w-[120px] rounded-full text-center px-3 py-1 text-sm font-bold",
+            row.original.type === "fixed" && "bg-blue-100 text-blue-800",
+            row.original.type === "variable" && "bg-orange-100 text-orange-800"
           )}
         >
           {row.original.type}
@@ -146,9 +145,9 @@ export function ExpensesTable({ expenses = [], currency }: Props) {
   });
 
   return (
-    <Card className="w-full bg-slate-900 border-slate-800 shadow-lg">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xl font-bold text-white">Expenses</CardTitle>
+    <div className="">
+      <div className="flex items-center justify-between mb-6">
+        <div className="text-xl font-bold text-white">Expenses</div>
         <div className="flex gap-2">
           {table.getColumn("type") && (
             <DataTableFacetedFilter
@@ -161,8 +160,8 @@ export function ExpensesTable({ expenses = [], currency }: Props) {
             />
           )}
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div>
         <div className="rounded-lg border border-slate-800 overflow-hidden">
           <Table>
             <TableHeader className="bg-slate-800/50">
@@ -214,7 +213,7 @@ export function ExpensesTable({ expenses = [], currency }: Props) {
             </TableBody>
           </Table>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

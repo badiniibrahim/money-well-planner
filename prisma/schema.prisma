@@ -27,6 +27,7 @@ model User {
   debts        Debts[]
   savings      Savings[]
   pleasure     Pleasure[]
+  dailyAdvice  DailyAdvice[]
 
   @@map("user")
 }
@@ -51,6 +52,7 @@ model Budget {
   createdAt DateTime @default(now())
   clerkId   String
   user      User     @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  type      String   @default("budget")
 
   @@map("budget")
 }
@@ -64,8 +66,8 @@ model Expense {
   updatedAt    DateTime  @updatedAt
   clerkId      String
   type         String    @default("fixed")
-
-  user User @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  real         Float?
+  user         User      @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
 
   @@map("expense")
 }
@@ -94,6 +96,8 @@ model Debts {
   updatedAt       DateTime @updatedAt
   clerkId         String
   remainsToBePaid Float
+  type            String   @default("debts")
+  real            Float?
 
   user User @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
 
@@ -109,7 +113,8 @@ model Savings {
   clerkId      String
   type         String   @default("saving")
 
-  user User @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  user User   @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  real Float?
 
   @@map("savings")
 }
@@ -121,8 +126,21 @@ model Pleasure {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   clerkId      String
+  type         String   @default("pleasure")
+  real         Float?
 
   user User @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
 
   @@map("pleasure")
+}
+
+model DailyAdvice {
+  id        Int      @id @default(autoincrement())
+  advice    String
+  createdAt DateTime @default(now())
+  clerkId   String
+
+  user User @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+
+  @@map("daily_advice")
 }

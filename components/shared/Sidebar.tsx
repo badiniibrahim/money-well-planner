@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo } from "react";
 import { sidebarLinks } from "@/constants";
 import { cn } from "@/lib/utils";
 import { Menu, Wallet, TrendingUp, Gift, Lightbulb } from "lucide-react";
@@ -103,7 +104,7 @@ function SidebarContent() {
                 key={index}
                 href={route.route}
                 className={cn(
-                  "group flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-all",
+                  "group flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
                   isActive
                     ? "bg-gradient-to-r from-blue-500/20 to-blue-500/10 text-white"
                     : "text-slate-300 hover:bg-slate-800/50"
@@ -142,7 +143,7 @@ function SidebarContent() {
       </ScrollArea>
 
       <div className="mt-auto border-t border-slate-700/50 p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 transition-colors duration-200 hover:bg-slate-800/50 rounded-lg p-2 cursor-pointer">
           <div className="relative h-10 w-10">
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-500" />
             <div className="absolute inset-[2px] rounded-full bg-slate-800" />
@@ -161,6 +162,8 @@ function SidebarContent() {
 }
 
 function Sidebar() {
+  const memoizedSidebarContent = useMemo(() => <SidebarContent />, []);
+
   return (
     <>
       {/* Version mobile */}
@@ -170,6 +173,7 @@ function Sidebar() {
             variant="ghost"
             size="icon"
             className="md:hidden fixed top-4 left-4 z-50"
+            aria-label="Open menu"
           >
             <Menu className="h-6 w-6" />
           </Button>
@@ -178,13 +182,13 @@ function Sidebar() {
           side="left"
           className="w-80 p-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 border-r border-slate-700/50"
         >
-          <SidebarContent />
+          {memoizedSidebarContent}
         </SheetContent>
       </Sheet>
 
       {/* Version desktop */}
       <div className="relative hidden md:flex h-screen w-80 flex-col bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 border-r border-slate-700/50">
-        <SidebarContent />
+        {memoizedSidebarContent}
       </div>
     </>
   );

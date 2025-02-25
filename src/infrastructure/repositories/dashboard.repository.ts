@@ -38,7 +38,6 @@ export class DashboardRepository implements IDashboardRepository {
 
       const totalFixed = this.getSumByType(expenseData, "fixed");
       const totalVariable = this.getSumByType(expenseData, "variable");
-
       const totalSaving = this.getSumByType(savingsData, "saving");
       const totalInvest = this.getSumByType(savingsData, "invest");
 
