@@ -101,7 +101,7 @@ function SidebarContent() {
         </div>
       </div>
 
-      <Card className="mx-4 mt-4 bg-gradient-to-br from-slate-800/50 to-slate-800/30 p-3 border-white/5 backdrop-blur-xl">
+      {/*<Card className="mx-4 mt-4 bg-gradient-to-br from-slate-800/50 to-slate-800/30 p-3 border-white/5 backdrop-blur-xl">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-slate-300">Overview</span>
           <span className="text-xs font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
@@ -128,7 +128,7 @@ function SidebarContent() {
             icon={Gift}
           />
         </div>
-      </Card>
+      </Card>*/}
 
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-2.5">

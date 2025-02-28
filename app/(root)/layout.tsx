@@ -1,14 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  NotificationProvider,
-  NotificationCenter,
-} from "@/components/NotificationCenterWithContext";
 import Sidebar from "@/components/shared/Sidebar";
 import Loader from "@/components/shared/Loader";
 import AlertComponent from "@/components/shared/AlertComponent";
 import { getState } from "./dashboard/_actions/actions";
+import {
+  NotificationCenter,
+  NotificationProvider,
+} from "@/src/infrastructure/services/NotificationCenter";
 
 export default function DashboardLayout({
   children,
@@ -44,7 +44,7 @@ export default function DashboardLayout({
   if (!state) return null;
 
   return (
-    <NotificationProvider state={state}>
+    <NotificationProvider>
       <div className="flex min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800">
         <Sidebar />
         <main className="flex-1">

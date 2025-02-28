@@ -58,20 +58,6 @@ function ExpenseCard({
                 formattingFn={currencyFormatter}
                 className="text-2xl font-bold text-white"
               />
-              {trend && (
-                <div
-                  className={cn(
-                    "flex items-center text-xs font-medium",
-                    trend.isPositive ? "text-emerald-400" : "text-rose-400"
-                  )}
-                >
-                  <span>
-                    {trend.isPositive ? "+" : "-"}
-                    {Math.abs(trend.percentage).toFixed(1)}%
-                  </span>
-                  <span className="text-slate-400 ml-1">vs last month</span>
-                </div>
-              )}
             </div>
           </div>
         </div>

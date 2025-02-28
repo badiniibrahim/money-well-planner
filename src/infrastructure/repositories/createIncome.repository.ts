@@ -5,7 +5,7 @@ import {
   IncomeSchema,
   IncomeSchemaType,
 } from "@/src/entities/models/income/income";
-import { Budget } from "@prisma/client";
+import { Budget, BudgetRule } from "@prisma/client";
 import {
   DatabaseOperationError,
   InputParseError,
@@ -49,6 +49,8 @@ export class CreateIncomeRepository implements IIncomeRepository {
           throw new NotFoundError("Failed to create income.");
         }
 
+        await this.updateBudgetRules(userId);
+
         return income;
       });
     } catch (error) {
@@ -62,19 +64,103 @@ export class CreateIncomeRepository implements IIncomeRepository {
     }
   }
 
-  async getAllIncome(
+  async updateIncome(
+    incomeId: number,
+    form: IncomeSchemaType,
     userId: string
-  ): Promise<{ currency: string; incomes: Budget[] }> {
+  ): Promise<Budget> {
+    if (!userId) {
+      throw new UnauthenticatedError("Not authenticated");
+    }
+
+    const {
+      success,
+      data,
+      error: inputParseError,
+    } = IncomeSchema.safeParse(form);
+    if (!success) {
+      throw new InputParseError("Invalid data", { cause: inputParseError });
+    }
+
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const incomeExists = await tx.budget.findFirst({
+          where: { id: incomeId, clerkId: userId },
+        });
+
+        if (!incomeExists) {
+          throw new NotFoundError("Income not found.");
+        }
+
+        const updatedIncome = await tx.budget.update({
+          where: { id: incomeId },
+          data: {
+            ...data,
+          },
+        });
+
+        if (!updatedIncome) {
+          throw new NotFoundError("Failed to update income.");
+        }
+
+        await this.updateBudgetRules(userId);
+
+        return updatedIncome;
+      });
+    } catch (error) {
+      console.error(
+        `❌ Database Error in updateIncome (userId: ${userId}, incomeId: ${incomeId}):`,
+        error
+      );
+      throw new DatabaseOperationError(
+        `Failed to update income: ${(error as Error).message}`
+      );
+    }
+  }
+
+  async getIncomeById(
+    incomeId: number,
+    userId: string
+  ): Promise<Budget | null> {
     if (!userId) {
       throw new UnauthenticatedError("Not authenticated");
     }
 
     try {
-      const [userSettings, incomes] = await Promise.all([
+      const income = await prisma.budget.findFirst({
+        where: { id: incomeId, clerkId: userId },
+      });
+
+      return income;
+    } catch (error) {
+      console.error(
+        `❌ Database Error in getIncomeById (userId: ${userId}, incomeId: ${incomeId}):`,
+        error
+      );
+      throw new DatabaseOperationError(
+        `Failed to fetch income: ${(error as Error).message}`
+      );
+    }
+  }
+
+  async getAllIncome(userId: string): Promise<{
+    currency: string;
+    incomes: Budget[];
+    budgetRules?: BudgetRule;
+  }> {
+    if (!userId) {
+      throw new UnauthenticatedError("Not authenticated");
+    }
+
+    try {
+      const [userSettings, incomes, budgetRules] = await Promise.all([
         this.getUserSettings(userId),
         prisma.budget.findMany({
           where: { clerkId: userId },
-          orderBy: { createdAt: "asc" },
+          orderBy: { createdAt: "desc" },
+        }),
+        prisma.budgetRule.findFirst({
+          where: { clerkId: userId },
         }),
       ]);
 
@@ -83,6 +169,7 @@ export class CreateIncomeRepository implements IIncomeRepository {
       return {
         currency: userSettings?.currency || "USD",
         incomes,
+        budgetRules: budgetRules || undefined,
       };
     } catch (error) {
       console.error(
@@ -171,8 +258,20 @@ export class CreateIncomeRepository implements IIncomeRepository {
         }),
       ]);
 
-      if (!budget || !budgetRules) {
-        throw new NotFoundError("Budget or budget rules not found.");
+      if (!budgetRules) {
+        // Create default budget rules if they don't exist
+        await prisma.budgetRule.create({
+          data: {
+            needsPercentage: 50,
+            savingsPercentage: 30,
+            wantsPercentage: 20,
+            actualNeedsPercentage: 0,
+            actualSavingsPercentage: 0,
+            actualWantsPercentage: 0,
+            clerkId: userId,
+          },
+        });
+        return;
       }
 
       const totalBudget = budget._sum.amount ?? 0;
@@ -184,35 +283,24 @@ export class CreateIncomeRepository implements IIncomeRepository {
       const totalSaving = this.getSumByType(totalSavings, "saving");
       const totalInvest = this.getSumByType(totalSavings, "invest");
 
-      const totalExpenses = totalFixed + totalVariable;
-
+      const totalExpenses =
+        totalFixed + totalVariable + totalDebt + totalSaving + totalInvest;
       const needsPercentage = totalBudget
         ? (totalExpenses / totalBudget) * 100
         : 0;
-
       const savingsPercentage = totalBudget
         ? ((totalSaving + totalInvest + totalDebt) / totalBudget) * 100
         : 0;
-
       const wantsPercentage = totalBudget
         ? (totalPleasure / totalBudget) * 100
         : 0;
 
-      await prisma.budgetRule.upsert({
+      await prisma.budgetRule.update({
         where: { id: budgetRules.id },
-        update: {
+        data: {
           actualNeedsPercentage: needsPercentage,
           actualSavingsPercentage: savingsPercentage,
           actualWantsPercentage: wantsPercentage,
-        },
-        create: {
-          needsPercentage: 50,
-          savingsPercentage: 30,
-          wantsPercentage: 20,
-          actualNeedsPercentage: 0,
-          actualSavingsPercentage: 0,
-          actualWantsPercentage: 0,
-          clerkId: userId,
         },
       });
     } catch (error) {

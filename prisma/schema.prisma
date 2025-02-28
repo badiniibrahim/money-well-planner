@@ -20,39 +20,49 @@ model User {
   stripeCustomerId String?
 
   // Relations
-  budgets      Budget[]
-  userSettings UserSettings[]
-  budgetRule   BudgetRule[]
-  expense      Expense[]
-  debts        Debts[]
-  savings      Savings[]
-  pleasure     Pleasure[]
-  dailyAdvice  DailyAdvice[]
+  budgets       Budget[]
+  userSettings  UserSettings[]
+  budgetRule    BudgetRule[]
+  expense       Expense[]
+  debts         Debts[]
+  savings       Savings[]
+  pleasure      Pleasure[]
+  dailyAdvice   DailyAdvice[]
+  financialGoal FinancialGoal[]
+  notifications Notification[] // Nouvelle relation
 
   @@map("user")
 }
 
 model UserSettings {
-  id        Int      @id @default(autoincrement())
-  currency  String
-  clerkId   String   @unique
-  user      User     @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  currency           String
+  clerkId            String   @unique
+  language           String   @default("en") // Nouvelle propriété
+  theme              String   @default("dark") // Nouvelle propriété
+  emailNotifications Boolean  @default(true) // Nouvelle propriété
+  budgetAlerts       Boolean  @default(true) // Nouvelle propriété
+  weeklyReports      Boolean  @default(true) // Nouvelle propriété
+  user               User     @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@map("user_settings")
 }
 
 model Budget {
-  id        Int      @id @default(autoincrement())
-  name      String
-  date      DateTime @default(now())
-  amount    Float
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
-  clerkId   String
-  user      User     @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
-  type      String   @default("budget")
+  id          Int      @id @default(autoincrement())
+  name        String
+  date        DateTime @default(now())
+  amount      Float
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  clerkId     String
+  user        User     @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  type        String   @default("budget")
+  categoryId  Int?
+  isRecurring Boolean  @default(false)
+  frequency   String?
 
   @@map("budget")
 }
@@ -68,6 +78,7 @@ model Expense {
   type         String    @default("fixed")
   real         Float?
   user         User      @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  categoryId   Int?
 
   @@map("expense")
 }
@@ -143,4 +154,71 @@ model DailyAdvice {
   user User @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
 
   @@map("daily_advice")
+}
+
+model FinancialGoal {
+  id            Int         @id @default(autoincrement())
+  name          String
+  targetAmount  Float
+  currentAmount Float       @default(0)
+  startDate     DateTime    @default(now())
+  targetDate    DateTime
+  status        String      @default("in_progress") // in_progress, completed, cancelled
+  priority      String      @default("medium") // low, medium, high
+  description   String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  clerkId       String
+  user          User        @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  milestones    Milestone[]
+
+  @@map("financial_goal")
+}
+
+model Milestone {
+  id             Int           @id @default(autoincrement())
+  name           String
+  targetAmount   Float
+  achievedAmount Float         @default(0)
+  targetDate     DateTime
+  status         String        @default("pending") // pending, achieved
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  goalId         Int
+  financialGoal  FinancialGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@map("milestone")
+}
+
+model IncomeCategory {
+  id        Int      @id @default(autoincrement())
+  name      String
+  clerkId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("income_category")
+}
+
+// Nouveau modèle pour les notifications
+model Notification {
+  id          Int       @id @default(autoincrement())
+  uniqueId    String    @unique // ID unique généré côté client
+  type        String // warning, info, success, critical
+  title       String
+  message     String
+  timestamp   DateTime  @default(now())
+  iconType    String // AlertCircle, TrendingUp, etc.
+  read        Boolean   @default(false)
+  priority    Int // 1 (highest) to 5 (lowest)
+  expiresAt   DateTime?
+  actionLabel String?
+  actionRoute String?
+  category    String // budget, savings, expenses, debt, system
+  clerkId     String
+  user        User      @relation(fields: [clerkId], references: [clerkId], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("notification")
 }
