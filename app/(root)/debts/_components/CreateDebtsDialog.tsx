@@ -81,7 +81,6 @@ function CreateDebtsDialog({ trigger }: Props) {
             className="text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
             onClick={() => setDialogOpen(false)}
           >
-            <X className="h-4 w-4" />
           </Button>
         </div>
 
